@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "demoflow",
+      "name": "claude-demo-flow",
       "source": {
         "source": "github",
         "repo": "pengyingxianbryan/claude-demo-flow"
