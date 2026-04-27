@@ -1,6 +1,6 @@
 ---
 description: Turn product info into a full demo plan — angles, recommended script, shot list, recording checklist.
-argument-hint: [product info — URL, description, audience, goal, format, platform, tone, CTA]
+argument-hint: [optional product info — URL, description, audience, goal, format, platform, tone, CTA]
 ---
 
 You are running `/demoflow:plan`, the entry point of the DemoFlow workflow.
@@ -9,11 +9,51 @@ You are running `/demoflow:plan`, the entry point of the DemoFlow workflow.
 
 `$ARGUMENTS`
 
-(May include any of: product URL, product name, description, audience, features, demo goal, format, platform, tone, CTA. May be partial. May be a single sentence.)
+(May be empty, a single sentence, or a partial brief. Do not assume anything that wasn't stated.)
 
-## What to produce
+## Phase 1 — Intake (default behavior)
 
-Produce **all sections below in order**, in one response. Do not stop and ask for more info first. Make assumptions, name them, keep moving.
+**Do not generate a plan on the first turn unless the user has explicitly provided every required field below.** Inferring a product, audience, or goal from a URL or one-liner produces a generic plan. Ask first.
+
+### Step 1.1 — Echo what you parsed
+
+Show a compact list of what the user *did* provide, mapped onto the schema fields. Mark anything you did not receive as `— missing —`. Do not guess.
+
+### Step 1.2 — Ask for the missing details
+
+Ask the user to fill in the missing fields, in one consolidated message. Use this structure:
+
+> I need a few details before I draft the plan. Please answer what you can — anything you skip, I'll flag as an assumption.
+
+Then list the questions, **only for fields that are still missing**, in this order:
+
+1. **Product name** — what is it called?
+2. **Product URL** — link, if any.
+3. **One-line description** — what does it actually do? (Not the marketing tagline — the literal function.)
+4. **Target audience** — who is this for? Be specific (e.g. "freelance designers who invoice 5–20 clients/month", not "small businesses").
+5. **Main user pain** — what problem does it solve, in their words?
+6. **Key features to show** — 1–4 features that matter for *this* demo. (If unsure, say so — I'll suggest.)
+7. **Demo goal** — what should a viewer do or feel after watching? (Sign up, book a call, understand the category, share with a friend…)
+8. **Format & length** — short-form (15–60s), walkthrough (1–3min), long-form (3min+)?
+9. **Platform** — TikTok, Reels, YouTube Shorts, YouTube long, X, LinkedIn, landing page hero, in-app onboarding…
+10. **Tone** — founder-led / casual / polished / technical / playful / deadpan…
+11. **Call to action** — what's the exact CTA line or destination?
+
+End the intake message with:
+
+> Reply with whatever you have — even partial answers move us forward. If you'd rather I just guess and produce a draft, say **"just guess"** and I'll generate with assumptions called out.
+
+**Then stop. Wait for the user's reply. Do not produce any sections from Phase 2 yet.**
+
+### Escape hatches
+
+- If the user's first message says **"just guess"**, **"infer"**, **"go ahead"**, **"draft anyway"**, or similar → skip Phase 1 and run Phase 2 with assumptions explicitly called out in section 2.
+- If the user has already supplied **all 11 fields** in `$ARGUMENTS` → skip Phase 1 and run Phase 2 directly.
+- If the user supplied **most** fields (≥ 8/11) and the missing ones are minor (e.g. only tone + CTA) → ask one short follow-up for just the missing items, do not re-list the full questionnaire.
+
+## Phase 2 — Plan generation
+
+Run this only after intake is satisfied (user answered, said "just guess", or supplied everything upfront). Produce **all sections below in order**, in one response.
 
 ### 1. Product Snapshot
 
@@ -30,7 +70,7 @@ Compact list:
 
 ### 2. Assumptions Made
 
-Bullet every detail you inferred or guessed. If you only had a URL or product name, the list will be long — that is fine. Be honest about what is inferred. Do **not** invent specific features as if you saw them.
+Bullet every detail you inferred or guessed. If the user answered fully, this list should be short or empty. Be honest about what is inferred. Do **not** invent specific features as if you saw them.
 
 ### 3. DemoFlow Context Block
 

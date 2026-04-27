@@ -53,7 +53,7 @@ Every later command reads the **most recent** DemoFlow Context Block in the conv
 These are non-negotiable:
 
 1. **Always work from the latest DemoFlow Context Block unless the user explicitly overrides it.**
-2. **Do not block the user with mandatory clarifying questions. If information is incomplete, make reasonable assumptions, show those assumptions, and continue with a useful draft.**
+2. **`/demoflow:plan` runs an intake step first** — it asks the user for the missing fields it needs (product, audience, goal, format, platform, tone, CTA, etc.) before generating, unless the user said "just guess" or already supplied everything. Other commands (`/demoflow:script`, `/demoflow:review`, `/demoflow:export`) read the latest DemoFlow Context Block and do **not** block on clarifying questions — if context is incomplete there, make reasonable assumptions, mark them, and produce a useful draft.
 3. **Do not claim the skill can inspect a URL unless browser/search capability is actually available.**
 4. **Do not hallucinate specific product features from a URL. If inferred, mark them clearly as assumptions.**
 
