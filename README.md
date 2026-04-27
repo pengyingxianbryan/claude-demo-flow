@@ -19,7 +19,7 @@ From inside Claude Code:
 
 ```
 /plugin marketplace add pengyingxianbryan/claude-demo-flow
-/plugin install demoflow@claude-demo-flow
+/plugin install claude-demo-flow
 ```
 
 That's it. The four `/demoflow:*` commands are now available.
@@ -28,13 +28,13 @@ To update later:
 
 ```
 /plugin marketplace update claude-demo-flow
-/plugin install demoflow@claude-demo-flow
+/plugin install claude-demo-flow
 ```
 
 To uninstall:
 
 ```
-/plugin uninstall demoflow@claude-demo-flow
+/plugin uninstall claude-demo-flow
 /plugin marketplace remove claude-demo-flow
 ```
 
@@ -44,7 +44,7 @@ If you've cloned the repo and want to install from your local checkout:
 
 ```
 /plugin marketplace add /path/to/claude-demo-flow
-/plugin install demoflow@claude-demo-flow
+/plugin install claude-demo-flow
 ```
 
 ## The four commands
