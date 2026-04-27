@@ -7,8 +7,8 @@
     {
       "name": "claude-demo-flow",
       "source": {
-        "source": "github",
-        "repo": "pengyingxianbryan/claude-demo-flow"
+        "source": "git",
+        "url": "https://github.com/pengyingxianbryan/claude-demo-flow.git"
       },
       "description": "Turn a SaaS product into a recordable demo: angles, scripts, shot lists, recording checklists, and exportable plans."
     }
