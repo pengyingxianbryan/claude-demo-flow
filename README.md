@@ -111,8 +111,9 @@ Together they cover the majority of SaaS demo cases.
 ## Repo layout
 
 ```
-claude-demo-flow/                       # plugin root
+claude-demo-flow/                       # marketplace + plugin root
   .claude-plugin/
+    marketplace.json                    # marketplace manifest
     plugin.json                         # plugin manifest
   skills/
     demoflow/SKILL.md                   # auto-activating skill
