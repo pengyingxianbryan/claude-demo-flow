@@ -15,15 +15,37 @@ You describe your product. DemoFlow gives you:
 
 ## Install
 
-This is a Claude Code plugin. To use it locally:
+From inside Claude Code:
 
-```bash
-# from inside Claude Code
-/plugin marketplace add /Users/bryanphang/Projects/work/claude-demo-flow
-/plugin install demoflow
+```
+/plugin marketplace add pengyingxianbryan/claude-demo-flow
+/plugin install demoflow@claude-demo-flow
 ```
 
-Or add it to your Claude Code settings as a local plugin path.
+That's it. The four `/demoflow:*` commands are now available.
+
+To update later:
+
+```
+/plugin marketplace update claude-demo-flow
+/plugin install demoflow@claude-demo-flow
+```
+
+To uninstall:
+
+```
+/plugin uninstall demoflow@claude-demo-flow
+/plugin marketplace remove claude-demo-flow
+```
+
+### Local development
+
+If you've cloned the repo and want to install from your local checkout:
+
+```
+/plugin marketplace add /path/to/claude-demo-flow
+/plugin install demoflow@claude-demo-flow
+```
 
 ## The four commands
 
