@@ -1,0 +1,5 @@
+playwright>=1.45
+python-dotenv>=1.0
+openai>=1.40
+pysrt>=1.1
+requests>=2.31
