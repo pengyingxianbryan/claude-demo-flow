@@ -66,6 +66,8 @@ If you've cloned the repo and want to install from your local checkout:
 | `/demoflow:record` | Drive Playwright through the shot list, capture a screen recording. |
 | `/demoflow:produce` | Synthesize voiceover, burn captions, render `final.mp4` (9:16 / 16:9 / 1:1). |
 
+`/demoflow:plan` itself can also do read-only credentialed work if a `.env` is present — see [Grounding the plan against your real product](#grounding-the-plan-against-your-real-product-v060) below.
+
 The skill also auto-activates without slash commands when you describe a SaaS product and ask for demo help.
 
 ## How context works
@@ -75,6 +77,29 @@ The skill also auto-activates without slash commands when you describe a SaaS pr
 If you want to override a field (e.g. switch platforms), just say it in your message: "use LinkedIn instead." The command will use your override.
 
 To start a fresh project, just run `/demoflow:plan` again with new info — it emits a new context block.
+
+## Grounding the plan against your real product (v0.6.0+)
+
+Plans drafted from descriptions alone tend to be generic — they invent screen names, miss real flows, and pick angles that don't match what your product actually does. To fix this, `/demoflow:plan` now asks two optional questions during intake:
+
+1. **Live access** — if you have a `.env` with `DEMOFLOW_APP_URL`, `DEMOFLOW_USERNAME`, and `DEMOFLOW_PASSWORD`, plan will log in and walk the primary nav (capped at ~8 navigations) before drafting.
+2. **Source repo** — public GitHub URL or local path. Plan reads the README, route definitions, and main components (capped at ~10 file reads) to confirm what the product actually surfaces.
+
+When grounding runs, section 2 of the output splits into **Observed during grounding** (real screen names, real button text, real routes) versus **Still inferred**. Any contradictions between your intake answers and what was observed get called out under a `Discrepancies` sub-bullet.
+
+The context block schema gains three fields downstream commands can use:
+
+```jsonc
+{
+  "github_repo": "",
+  "grounded_via": "live | repo | both | none",
+  "observed_screens": []
+}
+```
+
+**Security note:** never paste passwords into chat. If you don't already have a `.env`, say "skip live access" and plan will run from descriptions only.
+
+**What grounding *doesn't* do:** it does not seed mock data, generate the Playwright seeder, or screenshot every shot. That's still `/demoflow:prep`. Grounding is read-only recon to inform the plan; prep makes the app demo-ready for recording.
 
 ## Quick start
 
@@ -169,11 +194,12 @@ claude-demo-flow/                       # marketplace + plugin root
 
 After installing in Claude Code:
 
-1. **Plan**: paste the BudgetBee quick-start block above. Confirm output includes a `demoflow-context` fenced block, ≥5 angles, a 30s script table, shot list, and checklist.
-2. **Script**: run `/demoflow:script angle:3 length:15s style:contrarian`. Confirm it reads the prior context (doesn't re-ask product info) and outputs a fresh 15s script.
-3. **Review**: paste a deliberately weak script. Confirm scorecard + 5 better hooks + rewritten version.
-4. **Export**: run `/demoflow:export type:full`. Confirm output is a single copy-paste markdown block.
-5. **Auto-activate**: in a fresh thread, type "I have a SaaS for freelancers, help me make a demo video." DemoFlow should engage and offer `/demoflow:plan`.
+1. **Plan**: paste the BudgetBee quick-start block above. Confirm output includes a `demoflow-context` fenced block (now with `github_repo`, `grounded_via`, `observed_screens` fields), ≥5 angles, a 30s script table, shot list, and checklist.
+2. **Plan with grounding**: drop a `.env` with valid `DEMOFLOW_*` keys into your project root, run `/demoflow:plan`, and answer "yes" when it asks about live access. Confirm it spends ~1–3 minutes exploring before drafting, and that section 2 contains an "Observed during grounding" sub-list with real screen names from your app.
+3. **Script**: run `/demoflow:script angle:3 length:15s style:contrarian`. Confirm it reads the prior context (doesn't re-ask product info) and outputs a fresh 15s script.
+4. **Review**: paste a deliberately weak script. Confirm scorecard + 5 better hooks + rewritten version.
+5. **Export**: run `/demoflow:export type:full`. Confirm output is a single copy-paste markdown block.
+6. **Auto-activate**: in a fresh thread, type "I have a SaaS for freelancers, help me make a demo video." DemoFlow should engage and offer `/demoflow:plan`.
 
 ## Credentialed automation
 
