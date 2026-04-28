@@ -7,11 +7,11 @@ description: Turn a SaaS product (URL, description, or rough idea) into a record
 
 DemoFlow is a product demo strategist. It takes a SaaS product description and produces the things you actually need to record a demo: demo angles, short-form scripts, a shot list, a recording checklist, an editing plan, and a copy-paste export.
 
-It is **not** a video generator. It does not render video, capture screenshots, or browse URLs. It produces the plan; you (or a video tool) produce the video.
+It also has an optional **credentialed automation** path: given login credentials in `.env`, it can log into the user's app, seed the mock data the script needs, drive the recording with Playwright, synthesize voiceover, and render the final MP4. Treat this as a watchable rough cut — pacing, b-roll, and music polish still belong to a human editor.
 
 ## Commands
 
-Four slash commands cover the full workflow:
+Seven slash commands cover the full workflow:
 
 | Command | When to use |
 |---|---|
@@ -19,6 +19,9 @@ Four slash commands cover the full workflow:
 | `/demoflow:script` | Regenerate scripts for a specific angle, length, platform, or style. |
 | `/demoflow:review` | Critique a script, shot list, or full plan before recording. |
 | `/demoflow:export` | Bundle the current demo project as clean copy-paste markdown. |
+| `/demoflow:prep` | **Credentialed.** Log in, seed mock data, screenshot every shot for verification. |
+| `/demoflow:record` | **Credentialed.** Drive Playwright through the shot list, capture a screen recording. |
+| `/demoflow:produce` | TTS + ffmpeg → `final.mp4` with burned captions and target aspect ratio. |
 
 The skill also auto-activates without slash commands when the user describes a SaaS product and asks for demo help.
 
@@ -36,6 +39,7 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
   "product_category": "",
   "key_features": [],
   "main_user_pain": "",
+  "demo_type": "marketing | walkthrough",
   "demo_goal": "",
   "demo_format": "",
   "preferred_tone": "",
@@ -45,6 +49,11 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
 }
 ```
 ````
+
+`demo_type` controls the entire output shape:
+
+- **`marketing`** — short-form video for top-of-funnel: hook in 3s, fast cuts, conversion-focused. Reference templates: `social_shorts.md`, `founder_led.md`.
+- **`walkthrough`** — literal step-by-step product demo for onboarding, sales calls, or docs: one UI action per step, instructional voiceover, comprehension-focused. Reference template: `product_walkthrough.md`.
 
 Every later command reads the **most recent** DemoFlow Context Block in the conversation and works from it. If the user explicitly overrides a field in their message, use the override.
 
@@ -73,14 +82,28 @@ These are non-negotiable:
 /demoflow:script    → optional: regenerate scripts for other angles/styles
 /demoflow:review    → after you draft something, get critique + rewrite
 /demoflow:export    → bundle for Notion / Google Docs / CapCut / Screen Studio
+
+# Optional credentialed automation (requires .env):
+/demoflow:prep      → log in, seed mock data, verify screens
+/demoflow:record    → capture the scripted walkthrough
+/demoflow:produce   → TTS + auto-edit → final.mp4
 ```
 
-Most users only need `/demoflow:plan` + `/demoflow:export`.
+Most users only need `/demoflow:plan` + `/demoflow:export`. The credentialed path is for users who want a rough-cut MP4 in one shot — typically screen-only demos for short-form social.
 
 ## Templates
 
-`templates/social_shorts.md` and `templates/founder_led.md` are reference patterns. Commands draw from them when relevant. They are not prompts the user runs — they are guidance for how to shape output.
+Three reference patterns under `templates/`:
+
+- `social_shorts.md` — TikTok / Reels / Shorts marketing demos
+- `founder_led.md` — talking-head + screen recording marketing demos
+- `product_walkthrough.md` — literal step-by-step product walkthroughs (onboarding, sales-call, docs)
+
+Commands draw from them based on `demo_type` and `platform`. They are not prompts the user runs — they are guidance for how to shape output.
 
 ## Example
 
-`examples/finance_tracker.md` is a full BudgetBee walkthrough showing the actual quality bar for each command output.
+Two end-to-end examples set the quality bar:
+
+- `examples/finance_tracker_conversion.md` — **marketing** demo for BudgetBee (30s social short, 5 angles, talking-head + screen).
+- `examples/finance_tracker_walkthrough.md` — **walkthrough** demo for BudgetBee (90s onboarding clip: sign-in → +New transaction → drag CSV → confirm import → see populated dashboard).

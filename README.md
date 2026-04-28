@@ -1,6 +1,6 @@
 # DemoFlow
 
-A Claude Code plugin that turns a SaaS product into a recordable demo plan: angles, short-form scripts, shot lists, recording checklists, and exportable markdown. No video rendering, no API calls, no setup — just a skill and four slash commands.
+A Claude Code plugin that turns a SaaS product into a recordable demo plan: angles, short-form scripts, shot lists, recording checklists, and exportable markdown. With optional credentialed automation, it can also seed mock data, capture the recording, and render a finished MP4.
 
 ## What it does
 
@@ -47,7 +47,9 @@ If you've cloned the repo and want to install from your local checkout:
 /plugin install claude-demo-flow
 ```
 
-## The four commands
+## Commands
+
+**Planning (no credentials needed):**
 
 | Command | What it does |
 |---|---|
@@ -55,6 +57,14 @@ If you've cloned the repo and want to install from your local checkout:
 | `/demoflow:script` | Regenerate scripts for a different angle, length, style, or platform. |
 | `/demoflow:review` | Paste a script or shot list — get a critique and rewrite. |
 | `/demoflow:export` | Bundle the current plan as clean copy-paste markdown. |
+
+**Credentialed automation (optional, requires `.env`):**
+
+| Command | What it does |
+|---|---|
+| `/demoflow:prep` | Log into the app, seed the mock data the script needs, screenshot every shot. |
+| `/demoflow:record` | Drive Playwright through the shot list, capture a screen recording. |
+| `/demoflow:produce` | Synthesize voiceover, burn captions, render `final.mp4` (9:16 / 16:9 / 1:1). |
 
 The skill also auto-activates without slash commands when you describe a SaaS product and ask for demo help.
 
@@ -97,16 +107,29 @@ Then optionally:
 /demoflow:export type: full
 ```
 
-See [`examples/finance_tracker.md`](examples/finance_tracker.md) for the full BudgetBee walkthrough and the actual quality bar each command should hit.
+Two end-to-end examples set the quality bar:
+
+- [`examples/finance_tracker_conversion.md`](examples/finance_tracker_conversion.md) — marketing demo (30s social short with hooks, angles, talking-head + screen)
+- [`examples/finance_tracker_walkthrough.md`](examples/finance_tracker_walkthrough.md) — product walkthrough (90s in-app onboarding: sign-in → drag-and-drop CSV → confirm import)
+
+## Two demo types
+
+`/demoflow:plan` asks up front which kind of demo you want. The output shape changes accordingly:
+
+| Type | When to pick it | Output |
+|---|---|---|
+| **Marketing** | Reel / Short / LinkedIn / landing page. Goal is conversion. | 5 angles, 30s hook-led script, 4–7-shot list. |
+| **Walkthrough** | Onboarding / sales call / docs / tutorial. Goal is comprehension. | One literal step-by-step script: sign-in page → click email → type password → click **Sign in** → click **+ New transaction** → drag CSV → confirm. 8–20 shots. |
 
 ## Templates
 
-Two reference patterns live in `templates/`:
+Three reference patterns in `templates/`:
 
-- [`social_shorts.md`](templates/social_shorts.md) — TikTok / Reels / YouTube Shorts (15–45s, vertical)
-- [`founder_led.md`](templates/founder_led.md) — talking-head + screen recording (LinkedIn, YouTube, landing page hero, 45–90s)
+- [`social_shorts.md`](templates/social_shorts.md) — TikTok / Reels / YouTube Shorts (marketing)
+- [`founder_led.md`](templates/founder_led.md) — talking-head + screen recording (marketing)
+- [`product_walkthrough.md`](templates/product_walkthrough.md) — literal step-by-step product walkthroughs
 
-Together they cover the majority of SaaS demo cases.
+Walkthroughs are the **best fit** for the credentialed automation path — they map cleanly onto Playwright actions (one click/fill/drag per shot), and instructional voiceover sounds natural via TTS.
 
 ## Repo layout
 
@@ -122,11 +145,23 @@ claude-demo-flow/                       # marketplace + plugin root
     script.md
     review.md
     export.md
+    prep.md                             # credentialed: data seeding
+    record.md                           # credentialed: screen recording
+    produce.md                          # TTS + ffmpeg → final.mp4
+  scripts/                              # Python automation
+    util.py
+    seed.py
+    record.py
+    tts.py
+    edit.py
   templates/
     social_shorts.md
     founder_led.md
+    product_walkthrough.md
   examples/
-    finance_tracker.md
+    finance_tracker_conversion.md       # marketing demo example
+    finance_tracker_walkthrough.md      # product walkthrough example
+  requirements.txt
   README.md
 ```
 
@@ -140,13 +175,98 @@ After installing in Claude Code:
 4. **Export**: run `/demoflow:export type:full`. Confirm output is a single copy-paste markdown block.
 5. **Auto-activate**: in a fresh thread, type "I have a SaaS for freelancers, help me make a demo video." DemoFlow should engage and offer `/demoflow:plan`.
 
-## What's intentionally not here
+## Credentialed automation
 
-- No login, billing, database, or web app
-- No browser automation, screenshot capture, or video rendering
-- No external API calls
-- No Python helpers
-- No 14-command workflow — trimmed from the original spec because most commands overlap with `/demoflow:plan` and would rarely get used
+If you want DemoFlow to actually produce the video — not just plan it — you'll need a `.env` file with credentials.
+
+### Where the `.env` file goes
+
+Create it **at the root of the project where you're running Claude Code** — i.e. the working directory you launched `claude` from, not the plugin install directory. The credentialed commands (`/demoflow:prep`, `/demoflow:record`, `/demoflow:produce`) read `.env` from `process.cwd()`.
+
+For most users, that means:
+
+```
+~/Projects/my-demo-project/        ← you launched `claude` here
+├── .env                           ← put credentials here
+├── .demoflow/                     ← session artifacts land here (auto-created, gitignored)
+└── (your other project files)
+```
+
+If you don't have a dedicated demo project yet, create one:
+
+```bash
+mkdir ~/demo-runs && cd ~/demo-runs
+claude
+```
+
+Then create `.env` in `~/demo-runs/`.
+
+### What goes in `.env`
+
+```bash
+# Required for /demoflow:prep and /demoflow:record
+DEMOFLOW_APP_URL=https://app.example.com/login
+DEMOFLOW_USERNAME=demo@example.com
+DEMOFLOW_PASSWORD=your-password-here
+
+# Required for /demoflow:produce — pick ONE TTS provider:
+
+# Option A: OpenAI (default, simpler)
+OPENAI_API_KEY=sk-...
+DEMOFLOW_TTS_VOICE=alloy           # optional: alloy | echo | fable | onyx | nova | shimmer
+
+# Option B: ElevenLabs (better voice quality, your own clone)
+ELEVENLABS_API_KEY=...
+ELEVENLABS_VOICE_ID=...            # find in ElevenLabs dashboard → Voices
+```
+
+If both providers are set, ElevenLabs wins.
+
+### Make sure `.env` is gitignored
+
+The plugin ships a `.gitignore` that excludes `.env` and `.demoflow/`. If you're adding `.env` to a repo that doesn't have those entries yet:
+
+```bash
+echo -e ".env\n.demoflow/" >> .gitignore
+```
+
+Verify before committing anything:
+
+```bash
+git check-ignore .env && echo "ignored ✓"
+```
+
+### One-time install
+
+```bash
+pip install -r requirements.txt        # from the plugin directory, or copy requirements.txt into your project
+playwright install chromium
+brew install ffmpeg                    # macOS — for Linux: apt/pacman/etc.
+```
+
+### Run the pipeline
+
+After `/demoflow:plan` (in walkthrough mode for best results):
+
+```
+/demoflow:prep      # logs in, seeds mock data, verifies each screen with a screenshot
+/demoflow:record    # drives Playwright through the shot list, saves recording.webm
+/demoflow:produce   # TTS + ffmpeg → final.mp4
+```
+
+All artifacts land in `<your-project>/.demoflow/<YYYYMMDD-HHMM>/`. Each run creates a new timestamped session — old sessions stay untouched until you delete them.
+
+### Rotating credentials
+
+If your demo password changes, edit `.env` directly and re-run `/demoflow:prep`. There's nothing cached — the scripts read fresh from `.env` on every invocation.
+
+### Honest limits
+
+1. **Selector drift.** Generic SaaS apps change their DOM. The seeder is regenerated from live exploration on every `/demoflow:prep` run, so this self-heals — but expect the occasional retry.
+2. **Auth friction.** Apps with SSO, MFA, or captcha will block prep. Provision a non-MFA demo account.
+3. **Founder-led demos.** Talking-head shots are not automatable. `/demoflow:record` warns and asks you to confirm before capturing screen-only.
+4. **TTS uncanny valley.** OpenAI `alloy` is decent but recognisable. Bring your own voice via ElevenLabs if it matters.
+5. **Polish ceiling.** Auto-edit cuts are clean but boring. Music, b-roll, kinetic typography belong in CapCut. Output is a watchable rough cut, not a viral hook.
 
 ## Future expansion
 

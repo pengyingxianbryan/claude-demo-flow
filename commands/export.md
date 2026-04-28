@@ -79,10 +79,16 @@ For partial exports (`script_only`, `shot_list_only`, `checklist_only`), output 
 
 ## After the code block
 
-Two short lines outside the block:
+Outside the block, give the user two paths — automated and manual:
 
-1. **What to do next** — one sentence on what to record/build first.
-2. **Next:** `/demoflow:review` once you have a draft, or `/demoflow:script` to try another angle.
+**Run it (credentialed automation):**
+- `/demoflow:prep` — log into the app from `.env` and seed the mock data the script needs
+- `/demoflow:record` — drive the shot list with Playwright and capture a screen recording
+- `/demoflow:produce` — synthesize voiceover, burn captions, render `final.mp4`
+
+Or follow the checklist above manually.
+
+**Iterate:** `/demoflow:review` once you have a draft, or `/demoflow:script` to try another angle.
 
 ## Style rules
 
