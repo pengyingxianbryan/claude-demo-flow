@@ -107,7 +107,10 @@ Then optionally:
 /demoflow:export type: full
 ```
 
-See [`examples/finance_tracker.md`](examples/finance_tracker.md) for the full BudgetBee walkthrough and the actual quality bar each command should hit.
+Two end-to-end examples set the quality bar:
+
+- [`examples/finance_tracker_conversion.md`](examples/finance_tracker_conversion.md) — marketing demo (30s social short with hooks, angles, talking-head + screen)
+- [`examples/finance_tracker_walkthrough.md`](examples/finance_tracker_walkthrough.md) — product walkthrough (90s in-app onboarding: sign-in → drag-and-drop CSV → confirm import)
 
 ## Two demo types
 
@@ -156,7 +159,8 @@ claude-demo-flow/                       # marketplace + plugin root
     founder_led.md
     product_walkthrough.md
   examples/
-    finance_tracker.md
+    finance_tracker_conversion.md       # marketing demo example
+    finance_tracker_walkthrough.md      # product walkthrough example
   requirements.txt
   README.md
 ```
@@ -173,31 +177,76 @@ After installing in Claude Code:
 
 ## Credentialed automation
 
-If you want DemoFlow to actually produce the video — not just plan it — set up `.env` in the project where you're running the commands:
+If you want DemoFlow to actually produce the video — not just plan it — you'll need a `.env` file with credentials.
+
+### Where the `.env` file goes
+
+Create it **at the root of the project where you're running Claude Code** — i.e. the working directory you launched `claude` from, not the plugin install directory. The credentialed commands (`/demoflow:prep`, `/demoflow:record`, `/demoflow:produce`) read `.env` from `process.cwd()`.
+
+For most users, that means:
+
+```
+~/Projects/my-demo-project/        ← you launched `claude` here
+├── .env                           ← put credentials here
+├── .demoflow/                     ← session artifacts land here (auto-created, gitignored)
+└── (your other project files)
+```
+
+If you don't have a dedicated demo project yet, create one:
+
+```bash
+mkdir ~/demo-runs && cd ~/demo-runs
+claude
+```
+
+Then create `.env` in `~/demo-runs/`.
+
+### What goes in `.env`
 
 ```bash
 # Required for /demoflow:prep and /demoflow:record
 DEMOFLOW_APP_URL=https://app.example.com/login
 DEMOFLOW_USERNAME=demo@example.com
-DEMOFLOW_PASSWORD=...
+DEMOFLOW_PASSWORD=your-password-here
 
-# Required for /demoflow:produce — pick one TTS provider:
-OPENAI_API_KEY=sk-...                    # default; uses tts-1 alloy
-# or
+# Required for /demoflow:produce — pick ONE TTS provider:
+
+# Option A: OpenAI (default, simpler)
+OPENAI_API_KEY=sk-...
+DEMOFLOW_TTS_VOICE=alloy           # optional: alloy | echo | fable | onyx | nova | shimmer
+
+# Option B: ElevenLabs (better voice quality, your own clone)
 ELEVENLABS_API_KEY=...
-ELEVENLABS_VOICE_ID=...
-DEMOFLOW_TTS_VOICE=alloy                 # optional, only for OpenAI
+ELEVENLABS_VOICE_ID=...            # find in ElevenLabs dashboard → Voices
 ```
 
-Install Python dependencies once:
+If both providers are set, ElevenLabs wins.
+
+### Make sure `.env` is gitignored
+
+The plugin ships a `.gitignore` that excludes `.env` and `.demoflow/`. If you're adding `.env` to a repo that doesn't have those entries yet:
 
 ```bash
-pip install -r requirements.txt
-playwright install chromium
-brew install ffmpeg                       # or apt/pacman/etc.
+echo -e ".env\n.demoflow/" >> .gitignore
 ```
 
-Then run the three credentialed commands in order after `/demoflow:plan`:
+Verify before committing anything:
+
+```bash
+git check-ignore .env && echo "ignored ✓"
+```
+
+### One-time install
+
+```bash
+pip install -r requirements.txt        # from the plugin directory, or copy requirements.txt into your project
+playwright install chromium
+brew install ffmpeg                    # macOS — for Linux: apt/pacman/etc.
+```
+
+### Run the pipeline
+
+After `/demoflow:plan` (in walkthrough mode for best results):
 
 ```
 /demoflow:prep      # logs in, seeds mock data, verifies each screen with a screenshot
@@ -205,7 +254,11 @@ Then run the three credentialed commands in order after `/demoflow:plan`:
 /demoflow:produce   # TTS + ffmpeg → final.mp4
 ```
 
-All artifacts land in `.demoflow/<YYYYMMDD-HHMM>/` (gitignored).
+All artifacts land in `<your-project>/.demoflow/<YYYYMMDD-HHMM>/`. Each run creates a new timestamped session — old sessions stay untouched until you delete them.
+
+### Rotating credentials
+
+If your demo password changes, edit `.env` directly and re-run `/demoflow:prep`. There's nothing cached — the scripts read fresh from `.env` on every invocation.
 
 ### Honest limits
 

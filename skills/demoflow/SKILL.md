@@ -103,4 +103,7 @@ Commands draw from them based on `demo_type` and `platform`. They are not prompt
 
 ## Example
 
-`examples/finance_tracker.md` is a full BudgetBee walkthrough showing the actual quality bar for each command output.
+Two end-to-end examples set the quality bar:
+
+- `examples/finance_tracker_conversion.md` — **marketing** demo for BudgetBee (30s social short, 5 angles, talking-head + screen).
+- `examples/finance_tracker_walkthrough.md` — **walkthrough** demo for BudgetBee (90s onboarding clip: sign-in → +New transaction → drag CSV → confirm import → see populated dashboard).
