@@ -1,9 +1,9 @@
 ---
-description: Seed the demo account from .env credentials — log in, create the mock data the script needs, screenshot every shot to verify.
+description: Seed the demo account from .env credentials — log in, create the mock data the script describes, screenshot every shot so the script can be verified against the real app.
 argument-hint: [optional: session_dir to reuse a previous prep]
 ---
 
-You are running `/demoflow:prep`. This is the first **credentialed** command — it actually logs into the user's app and creates data.
+You are running `/demoflow:prep`. This is the **credentialed** command — it logs into the user's app, creates mock data, and screenshots each shot so the script can be checked against real screens.
 
 ## Inputs
 
@@ -34,7 +34,7 @@ Expect `3`. If less, list which keys are missing and stop:
 ```bash
 mkdir -p .demoflow
 SESSION=".demoflow/$(date +%Y%m%d-%H%M)"
-mkdir -p "$SESSION/screenshots" "$SESSION/voiceover"
+mkdir -p "$SESSION/screenshots"
 echo "$SESSION"
 ```
 
@@ -142,13 +142,12 @@ Two short sections, plain text:
 
 **Prep complete.** Session: `<path>`. Mock data created: `<one-line summary>`. Screenshots: `<count>`.
 
-**Verify before recording:** open the PNGs in `<session>/screenshots/`. If any screen looks wrong, edit `seed-script.py` (selectors, data) and re-run `python scripts/seed.py <session>`.
+**Verify the script:** open the PNGs in `<session>/screenshots/` and walk them against the script row-by-row. If any screen disagrees with what the script claims (wrong button label, missing field, different empty state, etc.), refine the script via `/demoflow:script` or `/demoflow:review`, edit `seed-script.py` if the data needs adjusting, and re-run `python scripts/seed.py <session>`.
 
-**Next:** `/demoflow:record` to capture the scripted walkthrough.
+**Next:** record the demo yourself in your tool of choice (Loom / Tella / Screen Studio / OBS / CapCut) using the now-verified script and shot list, or run `/demoflow:export` to bundle everything for handoff.
 
 ## Style rules
 
 - Never log credentials. Echo only the username if needed for confirmation.
 - Use stable selectors when you find them (data-testid, ARIA). Fall back to text-content selectors before CSS class hashes.
 - If MFA / SSO / captcha blocks login, say so plainly, do not retry, and recommend the user provision a non-MFA demo account.
-- This command is **not** for founder-led demos with talking-head shots. If `plan.demo_format` includes "founder-led" or "talking-head", warn and ask the user to confirm they only want the screen segments seeded.

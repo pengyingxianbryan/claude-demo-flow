@@ -1,27 +1,25 @@
 ---
 name: demoflow
-description: Turn a SaaS product (URL, description, or rough idea) into a recordable demo plan — angles, short-form scripts, shot lists, recording checklists, and editing notes. Use when the user wants a product demo plan, SaaS demo script, demo video script, short-form product demo, screen-by-screen walkthrough, product walkthrough, feature demo script, landing page demo, recording checklist, editing plan, or critique of a demo script or shot list. Do not use for unrelated video editing, generic social media planning, general startup advice, product roadmap planning, or coding the actual product.
+description: Turn a SaaS product (URL, description, or rough idea) into accurate demo scripts — angles, short-form scripts, shot lists, and recording checklists, grounded against the live app. Use when the user wants a product demo plan, SaaS demo script, demo video script, short-form product demo, screen-by-screen walkthrough, product walkthrough, feature demo script, landing page demo, recording checklist, or critique of a demo script or shot list. Do not use for unrelated video editing, generic social media planning, general startup advice, product roadmap planning, or coding the actual product.
 ---
 
 # DemoFlow
 
-DemoFlow is a product demo strategist. It takes a SaaS product description and produces the things you actually need to record a demo: demo angles, short-form scripts, a shot list, a recording checklist, an editing plan, and a copy-paste export.
+DemoFlow is a product demo strategist focused on **accurate script generation**. It takes a SaaS product description and produces the planning artifacts you need before you record: demo angles, short-form scripts, a shot list, a recording checklist, and a copy-paste export.
 
-It also has an optional **credentialed automation** path: given login credentials in `.env`, it can log into the user's app, seed the mock data the script needs, drive the recording with Playwright, synthesize voiceover, and render the final MP4. Treat this as a watchable rough cut — pacing, b-roll, and music polish still belong to a human editor.
+It also has an optional **credentialed automation** path: given login credentials in `.env`, it can log into the user's app, seed the mock data the script describes, and screenshot every shot — so you can verify the script against the real product before you record outside the tool.
 
 ## Commands
 
-Seven slash commands cover the full workflow:
+Five slash commands cover the workflow:
 
 | Command | When to use |
 |---|---|
 | `/demoflow:plan` | Start here. Takes product info, produces the full demo plan in one pass. |
 | `/demoflow:script` | Regenerate scripts for a specific angle, length, platform, or style. |
-| `/demoflow:review` | Critique a script, shot list, or full plan before recording. |
+| `/demoflow:review` | Critique a script, shot list, or full plan. |
 | `/demoflow:export` | Bundle the current demo project as clean copy-paste markdown. |
-| `/demoflow:prep` | **Credentialed.** Log in, seed mock data, screenshot every shot for verification. |
-| `/demoflow:record` | **Credentialed.** Drive Playwright through the shot list, capture a screen recording. |
-| `/demoflow:produce` | TTS + ffmpeg → `final.mp4` with burned captions and target aspect ratio. |
+| `/demoflow:prep` | **Credentialed.** Log in, seed mock data, screenshot every shot to verify the script against the live app. |
 
 The skill also auto-activates without slash commands when the user describes a SaaS product and asks for demo help.
 
@@ -48,7 +46,7 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
   "github_repo": "",
   "grounded_via": "live | repo | both | none",
   "observed_screens": [],
-  "mode": "dry | ground | full",
+  "mode": "dry | ground",
   "assumptions": []
 }
 ```
@@ -87,13 +85,12 @@ These are non-negotiable:
 /demoflow:review    → after you draft something, get critique + rewrite
 /demoflow:export    → bundle for Notion / Google Docs / CapCut / Screen Studio
 
-# Optional credentialed automation (requires .env):
-/demoflow:prep      → log in, seed mock data, verify screens
-/demoflow:record    → capture the scripted walkthrough
-/demoflow:produce   → TTS + auto-edit → final.mp4
+# Optional credentialed verification (requires .env):
+/demoflow:prep      → log in, seed mock data, screenshot every shot to verify
+                      the script against the real app
 ```
 
-Most users only need `/demoflow:plan` + `/demoflow:export`. The credentialed path is for users who want a rough-cut MP4 in one shot — typically screen-only demos for short-form social.
+Most users only need `/demoflow:plan` + `/demoflow:export`. The credentialed path is for users who want to ground the script against their actual product before recording outside this tool.
 
 ## Templates
 

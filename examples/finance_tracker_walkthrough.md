@@ -148,7 +148,7 @@ CTA: (implicit — viewer is already in-product)
 **Voiceover**
 - Calm, second-person, ~140 wpm
 - One re-take per line, pick the most relaxed take
-- TTS is fine for v1 (this is the demo type that handles synthetic voice best)
+- Synthetic voice is acceptable for v1 of an instructional walkthrough — re-record in your own voice if it ships externally
 - No music during VO; light pad acceptable in post
 
 **QC**
@@ -160,7 +160,7 @@ CTA: (implicit — viewer is already in-product)
 
 ### 9. Recommended Next Step
 
-> **Next:** `/demoflow:prep` — this walkthrough is a perfect fit for credentialed automation. The shot list maps 1:1 onto Playwright actions and the voiceover synthesizes cleanly via TTS.
+> **Next:** `/demoflow:prep` — this walkthrough is a perfect fit for credentialed verification. The shot list maps 1:1 onto Playwright actions, so prep can seed mock data and screenshot every step for you to check the script against the real app before recording.
 
 Other useful commands:
 - `/demoflow:review` — once you have a draft VO recorded in your own voice
@@ -168,12 +168,12 @@ Other useful commands:
 
 ---
 
-## Notes on the credentialed pipeline for this walkthrough
+## Notes on the verification pass for this walkthrough
 
 This is the example to copy-paste into `.demoflow/<ts>/plan.json` if you want to dry-run `/demoflow:prep` end-to-end.
 
-- **`/demoflow:prep`** will use Chrome DevTools MCP to log into `https://app.budgetbee.app`, then click into "+ New transaction" → "Upload CSV" once to discover real selectors (the `data-testid` values above are illustrative; the prep agent should overwrite them with what it finds). It seeds the account by deleting any existing transactions and uploading `demo-jan.csv` once to confirm the import flow works, then deletes the test transactions to leave the account in clean state for the recording.
-- **`/demoflow:record`** generates a Playwright recorder that performs steps 1–12 with the timings above. The drag-and-drop in step 8 needs `page.evaluate` with a synthetic `DataTransfer` event — Playwright's `setInputFiles` is the simpler alternative if the modal accepts click-to-browse.
-- **`/demoflow:produce`** synthesizes 12 voiceover clips, stitches them, builds `captions.srt` from measured TTS durations, and renders **16:9** (`platform: in-app onboarding modal + help-center docs` → docs is wide-format). Override to **9:16** in the conversation if you want a vertical version for in-app mobile onboarding.
+- **`/demoflow:prep`** will use Chrome DevTools MCP to log into `https://app.budgetbee.app`, then click into "+ New transaction" → "Upload CSV" once to discover real selectors (the `data-testid` values above are illustrative; the prep agent should overwrite them with what it finds). It seeds the account by deleting any existing transactions, uploading `demo-jan.csv` once to confirm the import flow works, then screenshots each shot in `plan.shot_list` so you can walk the script against the real screens. Once you've verified, delete the test transactions to leave the account in clean state for the actual recording.
+- **Recording is on you.** Use the verified script + shot list inside Loom / Tella / Screen Studio / OBS / CapCut. The drag-and-drop in step 8, the column-mapping pause in step 9, and the net-figure highlight in step 11 all need a human eye on timing.
+- **Aspect ratio.** `platform: in-app onboarding modal + help-center docs` → render 16:9 in your editor for docs. For in-app mobile onboarding, re-export as 9:16.
 
-For walkthroughs longer than 60 seconds, consider splitting into two recordings (sign-in + import as one, categorisation as a second). A single 4-minute auto-generated MP4 has too many compounding failure points.
+For walkthroughs longer than 60 seconds, consider splitting into two recordings (sign-in + import as one, categorisation as a second). A single 4-minute take has too many compounding failure points.

@@ -81,12 +81,10 @@ For partial exports (`script_only`, `shot_list_only`, `checklist_only`), output 
 
 Outside the block, give the user two paths — automated and manual:
 
-**Run it (credentialed automation):**
-- `/demoflow:prep` — log into the app from `.env` and seed the mock data the script needs
-- `/demoflow:record` — drive the shot list with Playwright and capture a screen recording
-- `/demoflow:produce` — synthesize voiceover, burn captions, render `final.mp4`
+**Verify it (credentialed):**
+- `/demoflow:prep` — log into the app from `.env`, seed the mock data the script describes, and screenshot every shot so you can walk the script against real screens before recording.
 
-Or follow the checklist above manually.
+Then record the demo yourself in your tool of choice (Loom / Tella / Screen Studio / OBS / CapCut) using the verified script and checklist above.
 
 **Iterate:** `/demoflow:review` once you have a draft, or `/demoflow:script` to try another angle.
 

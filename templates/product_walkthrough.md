@@ -64,15 +64,15 @@ On top of the standard checklist, walkthroughs need:
 - **No real PII.** All names, emails, dollar amounts, file names should be obviously fake (`demo@example.com`, `Acme Inc`, `transactions-jan.csv`).
 - **Cursor visibility.** Turn on cursor highlighting in the recorder (or post in CapCut). Walkthroughs without visible cursors are unwatchable.
 
-## Compatibility with credentialed automation
+## Compatibility with credentialed verification
 
-Walkthrough mode is the **best fit** for `/demoflow:prep` → `/demoflow:record` → `/demoflow:produce`:
+Walkthrough mode is the **best fit** for `/demoflow:prep`:
 
-- The shot list maps cleanly onto Playwright actions (one click/fill/drag per shot).
-- The voiceover is calm and instructional — TTS handles it well, no founder personality required.
-- The recording is fully deterministic — no emotional pacing, no "feel" to nail.
+- The shot list maps cleanly onto Playwright actions (one click/fill/drag per shot), so the seeder can populate the app and screenshot every step.
+- Each screenshot can be checked one-to-one against a script row — if the real "Sign in" button is actually labeled "Log in", you catch it before recording.
+- Clean starting state and stable test data are explicit requirements of this template, which is exactly what the seeder needs.
 
-For walkthroughs longer than 60 seconds, consider chunking into multiple shorter walkthroughs (one per workflow) and letting the user stitch them in CapCut. A single 4-minute auto-rendered walkthrough is harder to fix if any step glitches.
+For walkthroughs longer than 60 seconds, consider chunking into multiple shorter walkthroughs (one per workflow). Easier to verify, easier to refilm if any step changes.
 
 ## Examples of good walkthrough framings
 

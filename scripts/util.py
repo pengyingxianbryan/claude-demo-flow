@@ -22,8 +22,6 @@ except ImportError:
 
 
 REQUIRED_PREP_KEYS = ("DEMOFLOW_APP_URL", "DEMOFLOW_USERNAME", "DEMOFLOW_PASSWORD")
-REQUIRED_PRODUCE_KEYS_OPENAI = ("OPENAI_API_KEY",)
-REQUIRED_PRODUCE_KEYS_ELEVENLABS = ("ELEVENLABS_API_KEY", "ELEVENLABS_VOICE_ID")
 
 
 def project_root() -> Path:
@@ -63,7 +61,6 @@ def new_session_dir() -> Path:
     sess = root / session_stamp()
     sess.mkdir(parents=True, exist_ok=True)
     (sess / "screenshots").mkdir(exist_ok=True)
-    (sess / "voiceover").mkdir(exist_ok=True)
     return sess
 
 
