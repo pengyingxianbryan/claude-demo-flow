@@ -78,7 +78,7 @@ If you want to override a field (e.g. switch platforms), just say it in your mes
 
 To start a fresh project, just run `/demoflow:plan` again with new info — it emits a new context block.
 
-## Grounding the plan against your real product (v0.6.0+)
+## Grounding the plan against your real product (v0.7.0+)
 
 Plans drafted from descriptions alone tend to be generic — they invent screen names, miss real flows, and pick angles that don't match what your product actually does. To fix this, `/demoflow:plan` now asks two optional questions during intake:
 

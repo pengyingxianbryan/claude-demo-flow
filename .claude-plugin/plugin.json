@@ -1,6 +1,6 @@
 {
   "name": "demoflow",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Turn a SaaS product into a recordable demo: angles, scripts, shot lists, recording checklists, and exportable plans.",
   "author": {
     "name": "Bryan Phang"
