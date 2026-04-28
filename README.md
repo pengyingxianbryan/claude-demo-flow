@@ -78,28 +78,49 @@ If you want to override a field (e.g. switch platforms), just say it in your mes
 
 To start a fresh project, just run `/demoflow:plan` again with new info — it emits a new context block.
 
-## Grounding the plan against your real product (v0.7.0+)
+## Plan modes — tiered grounding (v0.8.0+)
 
-Plans drafted from descriptions alone tend to be generic — they invent screen names, miss real flows, and pick angles that don't match what your product actually does. To fix this, `/demoflow:plan` now asks two optional questions during intake:
+`/demoflow:plan` now asks **how deep you want it to go** before any other intake questions. The mode you pick changes which questions get asked, what the command does in the background, and what gets recommended next.
 
-1. **Live access** — if you have a `.env` with `DEMOFLOW_APP_URL`, `DEMOFLOW_USERNAME`, and `DEMOFLOW_PASSWORD`, plan will log in and walk the primary nav (capped at ~8 navigations) before drafting.
-2. **Source repo** — public GitHub URL or local path. Plan reads the README, route definitions, and main components (capped at ~10 file reads) to confirm what the product actually surfaces.
+| Mode | What runs | Time | Touches the app? |
+|---|---|---|---|
+| `dry` | Plan only, pure description-based. No `.env` needed. | ~30s | No |
+| `ground` | Plan + read-only recon (login, walk screens, capture real names + selectors) before drafting. **Default if `.env` is present.** | ~1–3 min | Reads only |
+| `full` | `ground` + after the plan, seeds mock data and screenshots every shot — leaves the app recording-ready. | ~5–8 min | **Writes data (with explicit confirmation)** |
 
-When grounding runs, section 2 of the output splits into **Observed during grounding** (real screen names, real button text, real routes) versus **Still inferred**. Any contradictions between your intake answers and what was observed get called out under a `Discrepancies` sub-bullet.
+### How plan guides you
 
-The context block schema gains three fields downstream commands can use:
+1. **First turn**: plan asks which mode you want, with a one-sentence pitch for each. Pick `dry` / `ground` / `full`. If unsure, `ground` is the safe middle.
+2. **Second turn**: plan asks the relevant intake questions (skips `.env` + repo questions in `dry` mode).
+3. **Phase 1.5** (only if `ground` or `full`): read-only recon. Logs in, walks screens, captures real screen names + button text. Reads README + routes if you gave a repo.
+4. **Phase 2**: produces the plan. Section 2 splits into **Observed during grounding** vs **Still inferred**. Any discrepancies between your intake and what was observed get flagged.
+5. **Phase 3** (only if `full`): plan asks **"Ready to seed? Reply `seed` / `stop here` / `change mode`."** Never seeds silently. On `seed`, it reuses the recon and runs `/demoflow:prep` inline, skipping prep's exploration step.
+6. **Section 9 — Recommended Next Step**: tailored to your mode. `dry` users get "set up `.env` and re-run with `ground`"; `ground` users get "run `/demoflow:prep` when ready to record"; `full` users get "`/demoflow:record`" after seeding.
+
+### Skipping the mode question
+
+You can pass mode as a flag to skip Step 1.2: `/demoflow:plan --ground` or `/demoflow:plan --full`. The user prompt also accepts `dry` / `ground` / `full` as a one-word reply at the mode gate. Saying **"just guess"** at any point sets `mode = dry` and produces a description-only plan with assumptions called out.
+
+### Context block fields
+
+The context block downstream commands read now includes:
 
 ```jsonc
 {
   "github_repo": "",
   "grounded_via": "live | repo | both | none",
-  "observed_screens": []
+  "observed_screens": [],
+  "mode": "dry | ground | full"
 }
 ```
 
-**Security note:** never paste passwords into chat. If you don't already have a `.env`, say "skip live access" and plan will run from descriptions only.
+`/demoflow:prep` reuses `observed_screens` to skip its own exploration pass when the plan already did it.
 
-**What grounding *doesn't* do:** it does not seed mock data, generate the Playwright seeder, or screenshot every shot. That's still `/demoflow:prep`. Grounding is read-only recon to inform the plan; prep makes the app demo-ready for recording.
+### Security & destructive-action rules
+
+- **Never paste passwords into chat.** Plan refuses inline passwords and walks you through `cp .env.example .env` if needed.
+- **Plan never seeds without explicit `seed` confirmation**, even when `--full` was passed. You always see the plan before any data is written to your app.
+- Use a non-MFA, non-production demo account. Seeding into a real customer-facing account is on you.
 
 ## Quick start
 

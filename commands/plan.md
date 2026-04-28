@@ -19,7 +19,28 @@ You are running `/demoflow:plan`, the entry point of the DemoFlow workflow.
 
 Show a compact list of what the user *did* provide, mapped onto the schema fields. Mark anything you did not receive as `— missing —`. Do not guess.
 
-### Step 1.2 — Ask for the missing details
+### Step 1.2 — Pick the depth (mode gate)
+
+Before asking the long question list, ask **one question first** and wait for the answer. The user's answer changes which questions you ask next and which phases you run. Use this exact framing:
+
+> Before I ask the rest, how deep do you want this run? Three options:
+>
+> | Mode | What I do | Time | Touches your app? |
+> |---|---|---|---|
+> | **`dry`** | Plan only, no live access. Pure description-based. | ~30s | No |
+> | **`ground`** | Plan + read-only recon (login, walk screens, capture real names + selectors) before drafting. **Default if you have a `.env`.** | ~1–3 min | Reads only |
+> | **`full`** | `ground` + after the plan, I seed mock data and screenshot every shot so you're recording-ready. | ~5–8 min | **Writes data** |
+>
+> Reply with `dry`, `ground`, or `full`. If you don't have an app yet or just want to brainstorm → pick `dry`. If unsure → `ground` is the safe middle.
+
+Quick recommend:
+- If `.env` with `DEMOFLOW_APP_URL/USERNAME/PASSWORD` is present in CWD → recommend `ground` next to the table.
+- If no `.env` and no repo URL provided → recommend `dry`.
+- Never auto-pick `full`. Seeding is destructive; the user must opt in explicitly.
+
+**Stop after asking. Wait for the user to pick.** Once they answer, store the choice as `mode` and continue to Step 1.3.
+
+### Step 1.3 — Ask for the missing details
 
 Ask the user to fill in the missing fields, in one consolidated message. Use this structure:
 
@@ -41,25 +62,29 @@ Then list the questions, **only for fields that are still missing**, in this ord
 10. **Platform** — TikTok, Reels, YouTube Shorts, YouTube long, X, LinkedIn, landing page hero, in-app onboarding, sales-call screen-share, docs page…
 11. **Tone** — founder-led / casual / polished / technical / playful / deadpan / instructional…
 12. **Call to action** — what's the exact CTA line or destination?
-13. **Live access (optional but strongly recommended)** — is there a `.env` in this repo with `DEMOFLOW_APP_URL`, `DEMOFLOW_USERNAME`, `DEMOFLOW_PASSWORD`? If yes, I'll log in and explore the real UI before drafting so the angles, screens, and shot list match what actually exists. If you don't have one yet, you can copy `.env.example` and fill it in, or skip and I'll work from your descriptions.
-    - **Do not paste passwords into chat.** If creds aren't in `.env`, say "skip live access" and I'll plan from descriptions only.
-14. **Source repo (optional)** — public GitHub URL or a local path. If provided, I'll skim the README, route definitions, and main components to ground the plan in actual product surface. Skip if proprietary or unavailable.
+**Conditional questions — only ask these if `mode` is `ground` or `full`:**
+
+13. **Live access** — is there a `.env` in this repo with `DEMOFLOW_APP_URL`, `DEMOFLOW_USERNAME`, `DEMOFLOW_PASSWORD`? Reply `yes`, `no` (and I'll show you how to set one up), or `skip live access` (use repo only).
+    - **Do not paste passwords into chat.** If creds aren't in `.env`, set them up there. If the user pastes a password inline, refuse and re-instruct.
+    - If they don't have a `.env` yet, give them the one-liner: `cp .env.example .env` (or show the keys to add). Wait for them to confirm before continuing.
+14. **Source repo (optional)** — public GitHub URL or a local path. If provided, I'll skim the README, route definitions, and main components. Skip if proprietary or unavailable.
 
 End the intake message with:
 
-> Reply with whatever you have — even partial answers move us forward. If you'd rather I just guess and produce a draft, say **"just guess"** and I'll generate with assumptions called out. If you provide live access or a repo, expect a 1–3 minute grounding pass before the plan appears.
+> Reply with whatever you have — even partial answers move us forward. If you'd rather I just guess and produce a draft, say **"just guess"** and I'll generate with assumptions called out.
 
 **Then stop. Wait for the user's reply. Do not produce any sections from Phase 2 yet.**
 
 ### Escape hatches
 
-- If the user's first message says **"just guess"**, **"infer"**, **"go ahead"**, **"draft anyway"**, or similar → skip Phase 1 and Phase 1.5, run Phase 2 with assumptions explicitly called out in section 2. Default `demo_type` to `marketing` unless the wording strongly implies a walkthrough ("onboarding video", "tutorial", "step-by-step", "show how to use").
-- If the user has already supplied **all required fields** in `$ARGUMENTS` (the 12 core fields; questions 13–14 are optional) → skip Phase 1 and continue to Phase 1.5 (grounding) if access was provided, otherwise jump to Phase 2.
-- If the user supplied **most** fields (≥ 9/12 core) and the missing ones are minor → ask one short follow-up for just the missing items plus the two optional access questions, do not re-list the full questionnaire. **Never skip the demo-type question** — it changes the entire output shape.
+- If the user's first message says **"just guess"**, **"infer"**, **"go ahead"**, **"draft anyway"**, or similar → set `mode = dry`, skip Phase 1 and Phase 1.5, run Phase 2 with assumptions explicitly called out in section 2. Default `demo_type` to `marketing` unless the wording strongly implies a walkthrough ("onboarding video", "tutorial", "step-by-step", "show how to use").
+- If the user explicitly typed `--dry`, `--ground`, or `--full` in `$ARGUMENTS` → skip Step 1.2 (mode gate), accept their choice, ask only for any missing fields the chosen mode needs.
+- If the user has already supplied **all required fields** in `$ARGUMENTS` (the 12 core fields plus a chosen mode) → skip Phase 1 and continue to Phase 1.5 if `mode` is `ground` or `full`, otherwise jump to Phase 2.
+- If the user supplied **most** fields (≥ 9/12 core) and the missing ones are minor → ask the mode question plus a short follow-up for just the missing items, do not re-list the full questionnaire. **Never skip the demo-type or mode questions** — they change the entire output shape and runtime.
 
-## Phase 1.5 — Grounding pass (only if live access or repo was provided)
+## Phase 1.5 — Grounding pass (only if `mode` is `ground` or `full`)
 
-Skip this phase entirely if the user said "skip live access" / "no repo" / "just guess". If skipped, set `grounded_via: "none"` in the context block and proceed straight to Phase 2.
+Skip this phase entirely if `mode = dry`. If skipped, set `grounded_via: "none"` in the context block and proceed straight to Phase 2.
 
 Tell the user one line before starting: `> Grounding the plan against your <app|repo|both> — back in ~1–3 min.` Then do the work below before generating any plan sections.
 
@@ -100,7 +125,7 @@ Before generating the plan, compare grounding findings to what the user said in 
 
 ## Phase 2 — Plan generation
 
-Run this only after intake is satisfied (user answered, said "just guess", or supplied everything upfront). Produce **all sections below in order**, in one response.
+Run this only after intake is satisfied (user answered, said "just guess", or supplied everything upfront). Phase 3 below only runs if `mode = full` and only after the user re-confirms. Produce **all sections below in order**, in one response.
 
 **Branch on `demo_type`:**
 - `marketing` → use the existing structure (sections 1–9 below). Hook-led, short-form, conversion-focused. Reference `templates/social_shorts.md` and `templates/founder_led.md`.
@@ -154,6 +179,7 @@ Output the canonical context as a fenced code block with the `demoflow-context` 
   "github_repo": "",
   "grounded_via": "live | repo | both | none",
   "observed_screens": [],
+  "mode": "dry | ground | full",
   "assumptions": []
 }
 ```
@@ -221,24 +247,53 @@ Five short groups. 3–5 bullets each. Demo-account, sample-data, browser/screen
 
 ### 9. Recommended Next Step
 
-Pick **exactly one**. Routing logic:
+Pick **exactly one**. Routing logic is **mode-aware** — guide the user toward the natural next action based on what they picked:
 
-- If product context is thin / mostly assumptions → `/demoflow:plan` again with more detail (be direct: "your context is thin, here's what to add").
-- If user asked for ideas / a-b options → `/demoflow:script` with a different style or length.
-- If user already has a draft to evaluate → `/demoflow:review`.
-- If the plan looks shippable as-is → `/demoflow:export`.
+**If `mode = dry`:**
+- Context is thin / mostly assumptions → tell them to set up `.env` and re-run `/demoflow:plan` in `ground` mode for a much better plan.
+- Plan looks plausible but they want to validate against the real app → re-run with `ground`.
+- They want to iterate on hooks/length/tone → `/demoflow:script`.
+- Plan looks shippable as a brainstorm → `/demoflow:export`.
+
+**If `mode = ground`:**
+- Plan reads accurate and they want to record → `/demoflow:prep` to seed the app, then `/demoflow:record`.
+- Discrepancies were found → fix the intake, re-run plan.
+- They want to A/B different angles → `/demoflow:script`.
+
+**If `mode = full`:** stop here — Phase 3 will handle the next step (seed → record).
 
 Format:
 
-> **Next:** `/demoflow:<command>` — one-sentence reason.
+> **Next:** `/demoflow:<command>` — one-sentence reason tied to the mode they picked.
 
 Then add 2–3 other useful commands as a short list, no commentary.
+
+## Phase 3 — Seeding (only if `mode = full`)
+
+Skip entirely unless `mode = full`. Do not run silently — seeding writes data into the user's app and they must re-confirm after seeing the plan.
+
+After Phase 2's section 9, append this prompt:
+
+> **Ready to seed?** You picked `full` mode. Next step is to write mock data into `DEMOFLOW_APP_URL` and screenshot every shot — this is destructive (creates real records in that account). Reply `seed` to continue, `stop here` to keep just the plan and run `/demoflow:prep` later, or `change mode` to drop back to `ground`.
+
+**Stop and wait.** Do not seed without explicit `seed` confirmation. Reactions:
+- `seed` → continue with the seeding handoff below.
+- `stop here` → end the turn. They have a complete plan + grounding; they can run `/demoflow:prep` whenever they're ready.
+- `change mode` → set `mode = ground`, end the turn, no seeding.
+
+Seeding handoff (only on `seed`):
+1. Reuse the context block already in this conversation — do not re-ask anything.
+2. Follow `commands/prep.md` Steps 1–3, 5–7 (seeder generation, run, report).
+3. **Skip prep's Step 4 (live exploration)** — `observed_screens` is already populated from Phase 1.5a. The selectors and screen names you captured there feed directly into the seeder template.
+4. When prep finishes, override section 9's recommendation: `> **Next:** /demoflow:record` — the app is now seeded and ready.
 
 ## Style rules
 
 - Do not pretend to have inspected the URL. If a URL is given, treat the name and any provided description as primary; mark inferred features as assumptions. **If Phase 1.5 grounding ran, you *did* inspect — use real screen names, real button text, and real routes verbatim, and credit them in section 2 under "Observed during grounding".**
 - **Never echo or log credentials.** Reading from `.env` is fine; printing the password back to the user is not. If you need to confirm login worked, echo only the username.
-- **Cap the grounding pass.** ~8 navigations live, ~10 file reads in the repo. The plan command is not the seeder — that's `/demoflow:prep`.
+- **Cap the grounding pass.** ~8 navigations live, ~10 file reads in the repo. The plan command is not the seeder — that's `/demoflow:prep` (or Phase 3 in `full` mode).
+- **Always confirm before destructive actions.** Phase 3 only runs after the user replies `seed`. Never seed silently, even if `mode = full` was set in `$ARGUMENTS`. Show the plan first, ask second, seed third.
+- **Tailor the next-step recommendation to the mode.** Don't tell a `dry`-mode user "go record now" — they have no recon. Don't tell a `full`-mode user (post-seed) "run /demoflow:prep" — it's already done.
 - Do not feature-dump. Translate every feature into a viewer-facing pain → action → outcome.
 - **Marketing scripts** are short-form video, not pitch decks. Lines under ~15 words. No "we believe…" "our mission is…" type filler.
 - **Walkthrough scripts** are literal. Every UI element named exactly. Every step is one user action. No skipped clicks. If the user has to wait for something to load, that is its own step.
