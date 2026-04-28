@@ -39,6 +39,7 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
   "product_category": "",
   "key_features": [],
   "main_user_pain": "",
+  "demo_type": "marketing | walkthrough",
   "demo_goal": "",
   "demo_format": "",
   "preferred_tone": "",
@@ -48,6 +49,11 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
 }
 ```
 ````
+
+`demo_type` controls the entire output shape:
+
+- **`marketing`** — short-form video for top-of-funnel: hook in 3s, fast cuts, conversion-focused. Reference templates: `social_shorts.md`, `founder_led.md`.
+- **`walkthrough`** — literal step-by-step product demo for onboarding, sales calls, or docs: one UI action per step, instructional voiceover, comprehension-focused. Reference template: `product_walkthrough.md`.
 
 Every later command reads the **most recent** DemoFlow Context Block in the conversation and works from it. If the user explicitly overrides a field in their message, use the override.
 
@@ -87,7 +93,13 @@ Most users only need `/demoflow:plan` + `/demoflow:export`. The credentialed pat
 
 ## Templates
 
-`templates/social_shorts.md` and `templates/founder_led.md` are reference patterns. Commands draw from them when relevant. They are not prompts the user runs — they are guidance for how to shape output.
+Three reference patterns under `templates/`:
+
+- `social_shorts.md` — TikTok / Reels / Shorts marketing demos
+- `founder_led.md` — talking-head + screen recording marketing demos
+- `product_walkthrough.md` — literal step-by-step product walkthroughs (onboarding, sales-call, docs)
+
+Commands draw from them based on `demo_type` and `platform`. They are not prompts the user runs — they are guidance for how to shape output.
 
 ## Example
 

@@ -109,14 +109,24 @@ Then optionally:
 
 See [`examples/finance_tracker.md`](examples/finance_tracker.md) for the full BudgetBee walkthrough and the actual quality bar each command should hit.
 
+## Two demo types
+
+`/demoflow:plan` asks up front which kind of demo you want. The output shape changes accordingly:
+
+| Type | When to pick it | Output |
+|---|---|---|
+| **Marketing** | Reel / Short / LinkedIn / landing page. Goal is conversion. | 5 angles, 30s hook-led script, 4–7-shot list. |
+| **Walkthrough** | Onboarding / sales call / docs / tutorial. Goal is comprehension. | One literal step-by-step script: sign-in page → click email → type password → click **Sign in** → click **+ New transaction** → drag CSV → confirm. 8–20 shots. |
+
 ## Templates
 
-Two reference patterns live in `templates/`:
+Three reference patterns in `templates/`:
 
-- [`social_shorts.md`](templates/social_shorts.md) — TikTok / Reels / YouTube Shorts (15–45s, vertical)
-- [`founder_led.md`](templates/founder_led.md) — talking-head + screen recording (LinkedIn, YouTube, landing page hero, 45–90s)
+- [`social_shorts.md`](templates/social_shorts.md) — TikTok / Reels / YouTube Shorts (marketing)
+- [`founder_led.md`](templates/founder_led.md) — talking-head + screen recording (marketing)
+- [`product_walkthrough.md`](templates/product_walkthrough.md) — literal step-by-step product walkthroughs
 
-Together they cover the majority of SaaS demo cases.
+Walkthroughs are the **best fit** for the credentialed automation path — they map cleanly onto Playwright actions (one click/fill/drag per shot), and instructional voiceover sounds natural via TTS.
 
 ## Repo layout
 
@@ -144,6 +154,7 @@ claude-demo-flow/                       # marketplace + plugin root
   templates/
     social_shorts.md
     founder_led.md
+    product_walkthrough.md
   examples/
     finance_tracker.md
   requirements.txt
