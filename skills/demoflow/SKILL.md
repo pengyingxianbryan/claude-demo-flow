@@ -45,6 +45,9 @@ Claude Code does not have persistent skill memory across turns. To avoid making 
   "preferred_tone": "",
   "platform": "",
   "call_to_action": "",
+  "github_repo": "",
+  "grounded_via": "live | repo | both | none",
+  "observed_screens": [],
   "assumptions": []
 }
 ```
